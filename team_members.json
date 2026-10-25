@@ -1,0 +1,51 @@
+[
+  {
+    "name": "Abdullah Jan Sani",
+    "weight_class": "-70kg Class",
+    "initials": "Aj",
+    "note": "Current Champion Right Hand.",
+    "photo_filename": "abdullah.png"
+  },
+  {
+    "name": "M.Zain Ijaz",
+    "weight_class": "-60kg Class",
+    "initials": "ZI",
+    "note": "Current Champion Both Hands.",
+    "photo_filename": "zain.png"
+  },
+  {
+    "name": "Waqas Bhatti",
+    "weight_class": "-80kg Class",
+    "initials": "WB",
+    "note": "",
+    "photo_filename": "waqas.png"
+  },
+  {
+    "name": "Skiandar Satti",
+    "weight_class": "-80kg Class",
+    "initials": "SS",
+    "note": "",
+    "photo_filename": "sikandar.png"
+  },
+  {
+    "name": "Sajjad Khan",
+    "weight_class": "-70kg Class",
+    "initials": "SK",
+    "note": "Current Champion Left Hand",
+    "photo_filename": "sajjad.png"
+  },
+  {
+    "name": "Farhan",
+    "weight_class": "-60kg Class",
+    "initials": "F",
+    "note": "",
+    "photo_filename": "farhan.png"
+  },
+  {
+    "name": "Abdull Rehman",
+    "weight_class": "-80kg Class",
+    "initials": "AR",
+    "note": "Current Champion Both Hands",
+    "photo_filename": "rehman.png"
+  }
+]

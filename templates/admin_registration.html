@@ -1,0 +1,355 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} | Kahuta Knights{% endblock %}
+{% block content %}
+
+<section class="page-hero">
+  <h1>{{ page_heading }}</h1>
+  <p>{{ note }}</p>
+  <div class="admin-nav-buttons">
+    <a href="{{ url_for('admin_access', target='team') }}" class="btn {{ 'btn-primary' if admin_tab == 'team_registration' else 'btn-ghost' }}">Team Registrations</a>
+    <a href="{{ url_for('admin_event_registration') }}" class="btn {{ 'btn-primary' if admin_tab == 'event_registration' else 'btn-ghost' }}">Event Registrations</a>
+    <a href="{{ url_for('admin_access', target='rankings') }}" class="btn {{ 'btn-primary' if admin_tab == 'rankings' else 'btn-ghost' }}">Manage Rankings</a>
+    <a href="{{ url_for('admin_access', target='events') }}" class="btn {{ 'btn-primary' if admin_tab == 'events' else 'btn-ghost' }}">Manage Events</a>
+  </div>
+  <p><a href="{{ url_for('admin_logout') }}" class="admin-logout-btn">Log out</a></p>
+</section>
+
+<section class="section">
+  {% if rows | length %}
+  <div class="registration-toolbar">
+    <div class="registration-search">
+      <span class="registration-search-icon">&#128269;</span>
+      <input type="text" id="regSearch" placeholder="Search by name..." autocomplete="off">
+    </div>
+    <div class="registration-count">
+      <span id="regCount">{{ rows|length }}</span> of {{ rows|length }} registrations
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table class="table" id="regTable">
+      <thead>
+        <tr>
+          {% for column in columns %}
+          <th>{{ column }}</th>
+          {% endfor %}
+          {% if admin_tab == 'team_registration' %}
+          <th>Actions</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        {% set row_idx = loop.index0 %}
+        <tr data-name="{{ (row['Full Name'] or '')|lower }}">
+          {% for column in columns %}
+          <td>
+            {% if column == 'Full Name' %}
+              <div class="reg-name-cell">
+                <span class="reg-avatar">{{ (row[column] or '?')|first|upper }}</span>
+                <span>{{ row[column] }}</span>
+              </div>
+            {% elif column == 'Screenshot File' and row[column] %}
+              <button
+                type="button"
+                class="btn btn-ghost reg-view-btn"
+                onclick="openRegPreview('{{ url_for('static', filename='uploads/' + row[column]) }}', '{{ row[column]|e }}')"
+              >View</button>
+            {% else %}
+              {{ row[column] }}
+            {% endif %}
+          </td>
+          {% endfor %}
+
+          {% if admin_tab == 'team_registration' %}
+          <td>
+            <div style="display: flex; gap: 6px;">
+              <form action="{{ url_for('admin_team_registration_action', row_index=row_idx, action='approve') }}" method="POST" style="display:inline">
+                <button type="submit" class="btn btn-success" style="background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+                  Approve
+                </button>
+              </form>
+              <form action="{{ url_for('admin_team_registration_action', row_index=row_idx, action='waiting_list') }}" method="POST" style="display:inline">
+                <button type="submit" class="btn btn-warning" style="background-color: #ffc107; color: black; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+                  Waiting List
+                </button>
+              </form>
+              <form action="{{ url_for('admin_team_registration_action', row_index=row_idx, action='reject') }}" method="POST" style="display:inline">
+                <button type="submit" class="btn btn-danger" style="background-color: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">
+                  Reject
+                </button>
+              </form>
+            </div>
+          </td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p id="regNoResults" class="reg-no-results" style="display:none;">No registrations match that name.</p>
+  </div>
+  {% else %}
+  <p>No registrations found yet.</p>
+  {% endif %}
+</section>
+
+<div id="regPreviewOverlay" class="reg-preview-overlay" onclick="if(event.target===this) closeRegPreview()">
+  <div class="reg-preview-modal">
+    <div class="reg-preview-header">
+      <span id="regPreviewTitle" class="reg-preview-title"></span>
+      <div class="reg-preview-actions">
+        <a id="regPreviewDownload" href="#" target="_blank" rel="noopener" class="btn btn-ghost reg-preview-download">Open / Download</a>
+        <button type="button" class="reg-preview-close" onclick="closeRegPreview()" aria-label="Close">&times;</button>
+      </div>
+    </div>
+    <div id="regPreviewBody" class="reg-preview-body"></div>
+  </div>
+</div>
+
+<style>
+  .registration-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .registration-search {
+    position: relative;
+    flex: 1;
+    min-width: 240px;
+    max-width: 360px;
+  }
+  .registration-search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.6;
+    font-size: 14px;
+  }
+  .registration-search input {
+    width: 100%;
+    padding: 10px 14px 10px 38px;
+    border-radius: 8px;
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    background: var(--panel-soft);
+    color: var(--text);
+    font-size: 14px;
+    font-family: var(--font-body);
+  }
+  .registration-search input:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+  }
+  .registration-count {
+    color: var(--muted);
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .registration-count span {
+    color: var(--gold-bright);
+    font-weight: 700;
+  }
+  .reg-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .reg-avatar {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-bright), var(--gold));
+    color: #1a1400;
+    font-weight: 700;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .reg-view-btn {
+    padding: 5px 14px;
+    font-size: 12px;
+    min-width: 0;
+  }
+  .table tbody tr.reg-hidden {
+    display: none;
+  }
+  .reg-no-results {
+    text-align: center;
+    color: var(--muted);
+    padding: 20px 0 4px;
+  }
+
+  /* Screenshot preview modal */
+  .reg-preview-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .reg-preview-overlay.active {
+    display: flex;
+  }
+  .reg-preview-modal {
+    background: var(--panel, #16130b);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+    border-radius: 10px;
+    width: 100%;
+    max-width: 720px;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  }
+  .reg-preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+  }
+  .reg-preview-title {
+    color: var(--gold-bright, #f1c94f);
+    font-weight: 700;
+    font-size: 14px;
+    word-break: break-all;
+  }
+  .reg-preview-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .reg-preview-download {
+    padding: 6px 14px;
+    font-size: 12px;
+    min-width: 0;
+    white-space: nowrap;
+  }
+  .reg-preview-close {
+    background: none;
+    border: none;
+    color: var(--muted, #ccc);
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 4px;
+  }
+  .reg-preview-close:hover {
+    color: var(--gold-bright, #f1c94f);
+  }
+  .reg-preview-body {
+    padding: 16px;
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.2);
+    min-height: 200px;
+  }
+  .reg-preview-body img {
+    max-width: 100%;
+    max-height: 72vh;
+    border-radius: 6px;
+    display: block;
+  }
+  .reg-preview-body iframe {
+    width: 100%;
+    height: 72vh;
+    border: none;
+    background: #fff;
+    border-radius: 6px;
+  }
+  .reg-preview-unsupported {
+    text-align: center;
+    color: var(--muted, #ccc);
+    padding: 30px 10px;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('regSearch');
+    const table = document.getElementById('regTable');
+    const countEl = document.getElementById('regCount');
+    const noResultsEl = document.getElementById('regNoResults');
+    if (!searchInput || !table) return;
+
+    const rows = Array.from(table.querySelectorAll('tbody tr'));
+    const totalCount = rows.length;
+
+    searchInput.addEventListener('input', function () {
+      const query = searchInput.value.trim().toLowerCase();
+      let visibleCount = 0;
+
+      rows.forEach(function (row) {
+        const name = row.getAttribute('data-name') || '';
+        const matches = query === '' || name.indexOf(query) !== -1;
+        row.classList.toggle('reg-hidden', !matches);
+        if (matches) visibleCount++;
+      });
+
+      countEl.textContent = visibleCount;
+      noResultsEl.style.display = visibleCount === 0 ? 'block' : 'none';
+    });
+  });
+
+  var IMAGE_EXTS = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+  function openRegPreview(url, filename) {
+    var overlay = document.getElementById('regPreviewOverlay');
+    var body = document.getElementById('regPreviewBody');
+    var title = document.getElementById('regPreviewTitle');
+    var downloadLink = document.getElementById('regPreviewDownload');
+
+    title.textContent = filename;
+    downloadLink.href = url;
+    body.innerHTML = '';
+
+    var ext = (filename.split('.').pop() || '').toLowerCase();
+
+    if (IMAGE_EXTS.indexOf(ext) !== -1) {
+      var img = document.createElement('img');
+      img.src = url;
+      img.alt = filename;
+      body.appendChild(img);
+    } else if (ext === 'pdf') {
+      var iframe = document.createElement('iframe');
+      iframe.src = url;
+      body.appendChild(iframe);
+    } else {
+      var msg = document.createElement('div');
+      msg.className = 'reg-preview-unsupported';
+      msg.textContent = 'Preview not available for this file type (.' + ext + '). Use "Open / Download" above to view it.';
+      body.appendChild(msg);
+    }
+
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeRegPreview() {
+    var overlay = document.getElementById('regPreviewOverlay');
+    var body = document.getElementById('regPreviewBody');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+    body.innerHTML = '';
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeRegPreview();
+  });
+</script>
+
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Kahuta Knights Armwrestling | Home{% endblock %}
+{% block content %}
+
+<section class="hero">
+  <img src="{{ url_for('static', filename='images/logo.jpg') }}" alt="" class="hero-watermark" aria-hidden="true">
+  <div class="hero-content">
+    <p class="hero-eyebrow">Kahuta &nbsp;·&nbsp; Punjab &nbsp;·&nbsp; Pakistan</p>
+    <h1 class="hero-title">KAHUTA<br><em>KNIGHTS</em></h1>
+    <p class="hero-motto">STRENGTH &nbsp;&#9670;&nbsp; HONOR &nbsp;&#9670;&nbsp; VICTORY</p>
+    <div class="hero-actions">
+      <a href="{{ url_for('register') }}" class="btn btn-primary">Join The Team</a>
+      <a href="{{ url_for('events') }}" class="btn btn-ghost">See Upcoming Events</a>
+    </div>
+  </div>
+  <div class="scroll-cue" aria-hidden="true">
+    <span></span>
+  </div>
+</section>
+
+<section class="stats-strip">
+  <div class="stat"><span class="stat-num">2026</span><span class="stat-label">Founded</span></div>
+  <div class="stat-divider"></div>
+  <div class="stat"><span class="stat-num">{{ team_members|length }}+</span><span class="stat-label">Athletes</span></div>
+  <div class="stat-divider"></div>
+  <div class="stat"><span class="stat-num">{{ events|length }}</span><span class="stat-label">Tournaments</span></div>
+  <!-- <div class="stat-divider"></div>
+  <div class="stat"><span class="stat-num">#1</span><span class="stat-label">Regional Ranking</span></div>
+-->
+</section>
+
+{% if nearest_tournament %}
+<div class="popup-overlay" id="nearest-event-popup" aria-live="polite" role="dialog" aria-modal="true">
+  <div class="popup-card">
+    <div class="popup-header">
+      <div>
+        <p class="popup-eyebrow">Nearest Tournament</p>
+        <h2 class="popup-title">{{ nearest_tournament.title }}</h2>
+        <p class="popup-meta">{{ nearest_tournament.day }} {{ nearest_tournament.month }} {{ nearest_tournament.year }}{% if nearest_tournament.location %} · {{ nearest_tournament.location }}{% endif %}</p>
+      </div>
+      <button id="popup-close-btn" class="popup-close" aria-label="Close nearest tournament popup">×</button>
+    </div>
+    <p class="popup-description">{{ nearest_tournament.description or 'Get ready for the next tournament coming soon.' }}</p>
+    <div class="popup-actions">
+      <a href="{{ url_for('events') }}" class="btn btn-primary">View All Events</a>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<section class="section core-team">
+  <div class="section-heading">
+    <span class="eyebrow">The Front Line</span>
+    <h2>Team Founders and Coaches</h2>
+  </div>
+
+  <div class="core-grid">
+    {% for member in core_members %}
+    <div class="core-card">
+      <div class="core-photo">
+        <span>{{ member.initials }}</span>
+      </div>
+      <h3>{{ member.name }}</h3>
+      <p class="core-role">{{ member.role }}</p>
+      <p class="core-bio">{{ member.bio }}</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="admin-access-buttons">
+    <a href="{{ url_for('admin_access', target='event') }}" class="btn btn-primary">Admin Panel</a>
+  </div>
+
+  
+</section>
+
+{% if nearest_tournament %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const popup = document.getElementById('nearest-event-popup');
+    const closeButton = document.getElementById('popup-close-btn');
+    if (!popup || !closeButton) return;
+
+    setTimeout(function () {
+      popup.classList.add('open');
+    }, 250);
+
+    closeButton.addEventListener('click', function () {
+      popup.classList.remove('open');
+    });
+
+    popup.addEventListener('click', function (event) {
+      if (event.target === popup) {
+        popup.classList.remove('open');
+      }
+    });
+  });
+</script>
+{% endif %}
+
+{% endblock %}

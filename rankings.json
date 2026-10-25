@@ -1,0 +1,158 @@
+[
+  {
+    "name": "-60kg Class",
+    "rows": [
+      {
+        "rank": 1,
+        "name": "Meeshan Ali",
+        "move": "none"
+      },
+      {
+        "rank": 2,
+        "name": "Ahad",
+        "move": "none"
+      },
+      {
+        "rank": 3,
+        "name": "Moez Ijaz",
+        "move": "up"
+      }
+    ],
+    "left_rows": [
+      {
+        "rank": 1,
+        "name": "Meeshan Ali",
+        "move": "none"
+      },
+      {
+        "rank": 2,
+        "name": "Farhan",
+        "move": "none"
+      },
+      {
+        "rank": 4,
+        "name": "Ahad",
+        "move": "none"
+      },
+      {
+        "rank": 5,
+        "name": "Moez Ijaz",
+        "move": "up"
+      }
+    ]
+  },
+  {
+    "name": "-70kg Class",
+    "rows": [
+      {
+        "rank": 1,
+        "name": "Abdullah Jan",
+        "move": "none"
+      },
+      {
+        "rank": 2,
+        "name": "Sajjad Khan",
+        "move": "none"
+      },
+      {
+        "rank": 3,
+        "name": "Hamid",
+        "move": "none"
+      },
+      {
+        "rank": 4,
+        "name": "Zain Ijaz",
+        "move": "none"
+      },
+      {
+        "rank": 5,
+        "name": "Abdullah Khan",
+        "move": "none"
+      }
+    ],
+    "left_rows": [
+      {
+        "rank": 1,
+        "name": "Sajjad Khan",
+        "move": "none"
+      },
+      {
+        "rank": 2,
+        "name": "Shahwaiz",
+        "move": "none"
+      },
+      {
+        "rank": 3,
+        "name": "Abdullah Khan",
+        "move": "none"
+      },
+      {
+        "rank": 4,
+        "name": "Abdullah Jan",
+        "move": "none"
+      },
+      {
+        "rank": 5,
+        "name": "Hamid",
+        "move": "none"
+      }
+    ]
+  },
+  {
+    "name": "Open Class",
+    "rows": [
+      {
+        "rank": 1,
+        "name": "Hamza Khan",
+        "move": "none"
+      },
+      {
+        "rank": 2,
+        "name": "Sajjad Khan",
+        "move": "none"
+      },
+      {
+        "rank": 3,
+        "name": "Abdull Rehman",
+        "move": "none"
+      },
+      {
+        "rank": 4,
+        "name": "Shehzad Khan",
+        "move": "none"
+      },
+      {
+        "rank": 5,
+        "name": "Shamas Hashmi",
+        "move": "none"
+      }
+    ],
+    "left_rows": [
+      {
+        "rank": 1,
+        "name": "Abdull Rehman",
+        "move": "none"
+      },
+      {
+        "rank": 2,
+        "name": "Shamas Hashmi",
+        "move": "none"
+      },
+      {
+        "rank": 3,
+        "name": "Shehzad Khan",
+        "move": "none"
+      },
+      {
+        "rank": 4,
+        "name": "Sajjad Khan",
+        "move": "none"
+      },
+      {
+        "rank": 5,
+        "name": "Waqas Bhatti",
+        "move": "none"
+      }
+    ]
+  }
+]

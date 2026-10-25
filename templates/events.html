@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+{% block title %}Events | Kahuta Knights{% endblock %}
+{% block content %}
+
+<section class="page-hero">
+  <h1>Events</h1>
+  <p>Tournaments, trials, and training camps on the Kahuta Knights calendar.</p>
+  {% if is_admin %}
+    <p><a href="{{ url_for('admin_events') }}">Manage Events</a></p>
+  {% endif %}
+</section>
+
+{% if nearest_tournament %}
+<section class="section">
+  <div class="registration-panel">
+    <div class="registration-panel-info">
+      <span class="status-badge status-upcoming">Registration Open</span>
+      <h2>{{ nearest_tournament.title }}</h2>
+      <p class="timeline-location">&#128205; {{ nearest_tournament.location }} &nbsp;&bull;&nbsp; {{ nearest_tournament.day }} {{ nearest_tournament.month }} {{ nearest_tournament.year }}</p>
+      <p>{{ nearest_tournament.description }}</p>
+    </div>
+    <div class="registration-panel-action">
+      <a href="{{ url_for('register_event') }}" class="btn btn-primary">Register for Tournament</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="section">
+  <div class="timeline">
+    {% for event in events %}
+    {% set event_index = loop.index0 %}
+    {% set links = event.video_links or {} %}
+    {% set has_links = event.event_type == 'super_fight' and (links.youtube or links.tiktok or links.instagram) %}
+    <div class="timeline-item {{ 'is-past' if event.status == 'Completed' else '' }}">
+      <div class="timeline-date">
+        <span class="date-day">{{ event.day }}</span>
+        <span class="date-month">{{ event.month }} {{ event.year }}</span>
+      </div>
+      <div class="timeline-connector"></div>
+      <div class="timeline-card">
+        <span class="status-badge {{ 'status-past' if event.status == 'Completed' else 'status-upcoming' }}">{{ event.status }}</span>
+        <h3>{{ event.title }}</h3>
+        <p class="timeline-location">&#128205; {{ event.location }}</p>
+        <p>{{ event.description }}</p>
+
+        <div class="event-actions">
+          {% if event.poster_filename or has_links %}
+            <button type="button" class="btn btn-ghost" onclick="openEventModal({{ event_index }})">View Event</button>
+          {% endif %}
+          {% if event.event_type == 'tournament' and event.status == 'Upcoming' %}
+            <a href="{{ url_for('register_event') }}" class="btn btn-primary">Register Now</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- Per-event popups: hidden until "View Event" is clicked -->
+{% for event in events %}
+{% set event_index = loop.index0 %}
+{% set links = event.video_links or {} %}
+<div id="event-modal-{{ event_index }}" class="event-modal-overlay" onclick="if (event.target === this) closeEventModal({{ event_index }})">
+  <div class="event-modal-box">
+    <span class="event-modal-close" onclick="closeEventModal({{ event_index }})">&times;</span>
+    <h3>{{ event.title }}</h3>
+
+    {% if event.poster_filename %}
+    <img src="{{ url_for('static', filename='uploads/' + event.poster_filename) }}" alt="{{ event.title }} poster" class="event-modal-poster" onclick="openLightbox(this.src)">
+    {% endif %}
+
+    {% if event.event_type == 'super_fight' and (links.youtube or links.tiktok or links.instagram) %}
+    <div class="event-video-links">
+      {% if links.youtube %}
+      <a href="{{ links.youtube }}" target="_blank" rel="noopener" class="video-link-btn video-link-youtube">Watch on YouTube</a>
+      {% endif %}
+      {% if links.tiktok %}
+      <a href="{{ links.tiktok }}" target="_blank" rel="noopener" class="video-link-btn video-link-tiktok">Watch on TikTok</a>
+      {% endif %}
+      {% if links.instagram %}
+      <a href="{{ links.instagram }}" target="_blank" rel="noopener" class="video-link-btn video-link-instagram">Watch on Instagram</a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {% if event.event_type == 'tournament' and event.status == 'Upcoming' %}
+    <div class="event-modal-register">
+      <a href="{{ url_for('register_event') }}" class="btn btn-primary">Register for Tournament</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endfor %}
+
+<div id="lightbox-overlay" class="lightbox-overlay" onclick="closeLightbox()">
+  <img id="lightbox-img" src="" alt="Full size poster" class="lightbox-img">
+  <span class="lightbox-close">&times;</span>
+</div>
+
+<style>
+  .registration-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(19, 19, 19, 0.9));
+    border: 1px solid var(--gold);
+    border-radius: 14px;
+    padding: 26px 30px;
+    box-shadow: 0 0 30px rgba(212, 175, 55, 0.12);
+  }
+  .registration-panel-info h2 {
+    font-family: var(--font-display);
+    color: var(--text);
+    margin: 4px 0 8px;
+    font-size: 22px;
+  }
+  .registration-panel-info p {
+    color: var(--muted);
+    margin: 0 0 4px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .registration-panel-info .timeline-location {
+    margin: 0 0 6px;
+  }
+  .registration-panel-action .btn {
+    white-space: nowrap;
+  }
+  .event-modal-register {
+    margin-top: 1rem;
+  }
+  .event-modal-register .btn {
+    width: 100%;
+  }
+
+  .event-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 900;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+  .event-modal-overlay.is-open {
+    display: flex;
+  }
+  .event-modal-box {
+    position: relative;
+    background: #1a1a1a;
+    border-radius: 10px;
+    padding: 1.5rem;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow-y: auto;
+    text-align: center;
+  }
+  .event-modal-poster {
+    max-width: 280px;
+    width: 100%;
+    max-height: 60vh;
+    object-fit: contain;
+    border-radius: 8px;
+    margin: 0.75rem 0;
+    cursor: zoom-in;
+  }
+  .event-modal-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 1rem;
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .event-video-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 1rem;
+    align-items: stretch;
+  }
+  .video-link-btn {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+    text-align: center;
+  }
+  .video-link-youtube { background: #FF0000; }
+  .video-link-tiktok { background: #010101; border: 1px solid #444; }
+  .video-link-instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+
+  .lightbox-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    cursor: zoom-out;
+  }
+  .lightbox-overlay.is-open {
+    display: flex;
+  }
+  .lightbox-img {
+    max-width: 92vw;
+    max-height: 92vh;
+    border-radius: 6px;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.6);
+  }
+  .lightbox-close {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    color: #fff;
+    font-size: 2.5rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+</style>
+
+<script>
+  function openEventModal(index) {
+    const overlay = document.getElementById('event-modal-' + index);
+    if (overlay) overlay.classList.add('is-open');
+  }
+  function closeEventModal(index) {
+    const overlay = document.getElementById('event-modal-' + index);
+    if (overlay) overlay.classList.remove('is-open');
+  }
+  function openLightbox(src) {
+    const overlay = document.getElementById('lightbox-overlay');
+    const img = document.getElementById('lightbox-img');
+    img.src = src;
+    overlay.classList.add('is-open');
+  }
+  function closeLightbox() {
+    const overlay = document.getElementById('lightbox-overlay');
+    overlay.classList.remove('is-open');
+    document.getElementById('lightbox-img').src = '';
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeLightbox();
+      document.querySelectorAll('.event-modal-overlay.is-open').forEach(el => el.classList.remove('is-open'));
+    }
+  });
+</script>
+
+{% endblock %}

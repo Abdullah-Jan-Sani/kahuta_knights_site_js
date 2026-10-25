@@ -1,0 +1,13 @@
+# Ignore uploaded files and generated registration data
+static/uploads/*
+!static/uploads/.gitkeep
+team_registrations.csv
+event_registrations.csv
+registrations.csv
+
+# Node
+node_modules/
+
+# Environment and secret files
+.env
+.env.*

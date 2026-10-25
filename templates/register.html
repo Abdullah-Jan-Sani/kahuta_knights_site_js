@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} | Kahuta Knights{% endblock %}
+{% block content %}
+
+<!-- Status Modal Popup -->
+<div id="statusModal" class="modal-overlay" style="display: none;">
+  <div class="modal-card">
+    <h3>Application Received</h3>
+    <p>Your application has been received by the management of Kahuta Knights and it will take almost 24 hours to review and take a decision. Please wait for 24 hours and check your email.</p>
+    <button type="button" id="modalOkBtn" class="modal-btn">OK</button>
+  </div>
+</div>
+
+<section class="page-hero">
+  <h1>{{ page_title }}</h1>
+  <p>{{ page_description }}</p>
+</section>
+
+<section class="section register-section">
+  <div class="form-card">
+
+    {% if form_type == 'event' and registration_closed %}
+    <div class="registration-closed-notice">
+      <h3>Online Registration Closed</h3>
+      <p>
+        Online registration for this tournament ended on
+        <strong>{{ registration_deadline }}</strong>.
+      </p>
+      <p>
+        You can still take part &mdash; <strong>on-spot entry fee is Rs. {{ onspot_fee }}</strong>,
+        payable in person at the venue on the day of the event.
+      </p>
+      <p class="contact-line">For more details contact here : 03448583226</p>
+    </div>
+    {% else %}
+
+    {% if form_type == 'event' and registration_deadline %}
+    <div class="deadline-notice">
+      ⏰ Online registration closes on <strong>{{ registration_deadline }}</strong>. Please submit your form before the deadline.
+    </div>
+    {% endif %}
+
+    <form id="registrationForm" action="{{ url_for('submit') }}" method="POST" enctype="multipart/form-data">
+      <input type="hidden" name="form_type" value="{{ form_type }}">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="full_name">Full Name <span class="required">*</span></label>
+          <input type="text" id="full_name" name="full_name" placeholder="Full Name" required>
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone <span class="required">*</span></label>
+          <input type="tel" id="phone" name="phone" placeholder="Phone" required>
+        </div>
+      </div>
+
+      {% if form_type == 'team' %}
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">Email <span class="required">*</span></label>
+          <input type="email" id="email" name="email" placeholder="Email" required>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="age">Age</label>
+          <input type="number" id="age" name="age" placeholder="Age" min="1">
+        </div>
+        <div class="form-group">
+          <label for="weight">Weight (kg)</label>
+          <input type="number" id="weight" name="weight" placeholder="Weight" min="1" step="0.1">
+        </div>
+      </div>
+
+      {% if form_type == 'event' %}
+      <div class="form-row">
+        <div class="form-group">
+          <label for="team_name">Team Name <span class="required">*</span></label>
+          <input type="text" id="team_name" name="team_name" placeholder="Team Name" required>
+        </div>
+        <div class="form-group">
+          <label for="email">Email <span class="required">*</span></label>
+          <input type="email" id="email" name="email" placeholder="Email" required>
+        </div>
+      </div>
+
+      <div class="acc-details">
+        <strong>ACCOUNT DETAILS : Easy Paisa</strong><br>
+        0344 8583226 (ABDULLAH JAN SANI)
+      </div>
+
+      <div class="form-group full-width">
+        <label for="screenshot">Attach Registration Fee Screenshot <span class="required">*</span></label>
+        <label class="upload-box" id="upload-label" for="screenshot">
+          <span id="upload-icon">&#8593;</span>
+          <span id="upload-text">Click to upload</span>
+          <span class="upload-hint">PDF, DOC/DOCX, XLS/CSV, JPG/JPEG, PNG, GIF</span>
+        </label>
+        <input type="file" id="screenshot" name="screenshot" accept=".pdf,.doc,.docx,.xls,.csv,.jpg,.jpeg,.png,.gif" required hidden>
+      </div>
+      {% endif %}
+
+      <button type="submit" class="submit-btn">{{ submit_label }}</button>
+
+      <p class="contact-line">For more details contact here : 03448583226</p>
+
+    </form>
+    {% endif %}
+  </div>
+</section>
+
+<style>
+/* Modal Popup Styling */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.modal-card {
+  background: #181818;
+  border: 1px solid #d4af37;
+  border-radius: 10px;
+  max-width: 450px;
+  width: 100%;
+  padding: 30px;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+}
+
+.modal-card h3 {
+  color: #d4af37;
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+}
+
+.modal-card p {
+  color: #dddddd;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 25px;
+}
+
+.modal-btn {
+  background-color: #d4af37;
+  color: #000;
+  font-weight: bold;
+  border: none;
+  padding: 10px 30px;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.modal-btn:hover {
+  opacity: 0.85;
+}
+
+/* Deadline Notice (registration still open) */
+.deadline-notice {
+  max-width: 600px;
+  margin: 0 auto 20px auto;
+  padding: 14px 20px;
+  background: rgba(212, 175, 55, 0.08);
+  border: 1px solid #d4af37;
+  border-radius: 8px;
+  color: #d4af37;
+  text-align: center;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Registration Closed Notice */
+.registration-closed-notice {
+  background: #181818;
+  border: 1px solid #d4af37;
+  border-radius: 10px;
+  padding: 30px;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
+}
+
+.registration-closed-notice h3 {
+  color: #d4af37;
+  font-size: 1.4rem;
+  margin-bottom: 15px;
+}
+
+.registration-closed-notice p {
+  color: #dddddd;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.registration-closed-notice p:last-child {
+  margin-bottom: 0;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const regForm = document.getElementById('registrationForm');
+  const statusModal = document.getElementById('statusModal');
+  const modalOkBtn = document.getElementById('modalOkBtn');
+  const formType = "{{ form_type }}";
+
+  if (regForm && formType === 'team') {
+    regForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      statusModal.style.display = 'flex';
+    });
+
+    modalOkBtn.addEventListener('click', function() {
+      statusModal.style.display = 'none';
+      regForm.submit();
+    });
+  }
+});
+</script>
+
+{% if form_type == 'event' %}
+<script>
+  const fileInput = document.getElementById('screenshot');
+  const uploadText = document.getElementById('upload-text');
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files.length > 0) {
+      uploadText.textContent = fileInput.files[0].name;
+    } else {
+      uploadText.textContent = 'Click to upload';
+    }
+  });
+</script>
+{% endif %}
+
+{% endblock %}
